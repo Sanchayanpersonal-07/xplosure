@@ -228,7 +228,7 @@ function App() {
                   </a>
                   <p className="flex items-start text-gray-600">
                     <HomeIcon className="h-5 w-5 mr-2 text-blue-600 mt-1 flex-shrink-0" />
-                    Subhasgram, Kolkata-700147,<br />West Bengal
+                    NH17, Bijoynagar - Jalukbari Rd, Bongora,<br />Guwahati, Assam 781015
                   </p>
                 </div>
                 <div className="mt-8">
@@ -238,14 +238,14 @@ function App() {
               </div>
               <div>
                 <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29519.58988358215!2d88.39626495544155!3d22.391218557997974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a02737605d6b1f9%3A0x17f8a735073fe135!2sSubhasgram%2C%20Kolkata%2C%20West%20Bengal%20700147!5e0!3m2!1sen!2sin" 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3581.716954271815!2d91.59768077524959!3d26.14081397711583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x375a44332348b6ad%3A0x63369325492a259c!2sNH17%2C%20Bongora%2C%20Assam%20781015!5e0!3m2!1sen!2sin!4v1716982888258!5m2!1sen!2sin"
                   width="100%" 
                   height="400" 
                   style={{ border: 0 }} 
                   allowFullScreen 
                   loading="lazy" 
                   className="rounded-lg shadow-lg" 
-                  title="Google Maps Location for Subhasgram, Kolkata">
+                  title="Google Maps Location for Guwahati">
                 </iframe>
               </div>
             </div>
