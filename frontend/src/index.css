@@ -1,0 +1,331 @@
+@import "tailwindcss";
+
+/* =============================================
+   DESIGN TOKENS
+   ============================================= */
+:root {
+  --navy:        #06091A;
+  --navy-2:      #0D1330;
+  --navy-3:      #141B3C;
+  --blue:        #2B5EE8;
+  --blue-light:  #4B7BFF;
+  --blue-glow:   rgba(43,94,232,0.35);
+  --cyan:        #00C6FF;
+  --white:       #F8FAFF;
+  --muted:       #8892B0;
+  --border:      rgba(255,255,255,0.07);
+  --glass:       rgba(255,255,255,0.04);
+  --glass-hover: rgba(255,255,255,0.07);
+  --card:        rgba(13,19,48,0.8);
+  --success:     #10D08C;
+  --warning:     #F5A623;
+  --error:       #FF4D6A;
+  --radius:      14px;
+  --radius-lg:   22px;
+  --shadow:      0 8px 32px rgba(0,0,0,0.4);
+  --shadow-blue: 0 8px 32px rgba(43,94,232,0.3);
+  --font-display: 'Sora', sans-serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
+}
+
+/* =============================================
+   BASE
+   ============================================= */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--navy);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: var(--navy-3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+
+/* =============================================
+   GLASS CARD
+   ============================================= */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.glass-hover:hover {
+  background: var(--glass-hover);
+  border-color: rgba(255,255,255,0.12);
+  transition: all 0.25s ease;
+}
+
+/* =============================================
+   GRADIENT TEXT
+   ============================================= */
+.grad-text {
+  background: linear-gradient(135deg, #fff 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.grad-text-blue {
+  background: linear-gradient(135deg, var(--blue-light) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px var(--blue-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--blue-glow); }
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--glass-hover);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* =============================================
+   INPUTS
+   ============================================= */
+.input-dark {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-dark::placeholder { color: var(--muted); }
+
+.input-dark:focus {
+  border-color: var(--blue);
+  background: rgba(43,94,232,0.08);
+  box-shadow: 0 0 0 3px rgba(43,94,232,0.15);
+}
+
+.input-dark.error {
+  border-color: var(--error);
+  background: rgba(255,77,106,0.05);
+}
+
+/* =============================================
+   MESH BACKGROUND
+   ============================================= */
+.mesh-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.mesh-bg::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(43,94,232,0.18) 0%, transparent 70%);
+  top: -200px; right: -100px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mesh-bg::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,198,255,0.1) 0%, transparent 70%);
+  bottom: -100px; left: -50px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =============================================
+   ANIMATIONS
+   ============================================= */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(43,94,232,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(43,94,232,0.6); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-float    { animation: float 4s ease-in-out infinite; }
+.animate-fade-up  { animation: fade-up 0.6s ease forwards; }
+.animate-scale-in { animation: scale-in 0.4s ease forwards; }
+
+.delay-100 { animation-delay: 0.1s; opacity: 0; }
+.delay-200 { animation-delay: 0.2s; opacity: 0; }
+.delay-300 { animation-delay: 0.3s; opacity: 0; }
+.delay-400 { animation-delay: 0.4s; opacity: 0; }
+.delay-500 { animation-delay: 0.5s; opacity: 0; }
+
+/* =============================================
+   STAT / SCORE RING
+   ============================================= */
+.score-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =============================================
+   TABLE
+   ============================================= */
+.dark-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: rgba(255,255,255,0.03);
+}
+
+.dark-table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: rgba(248,250,255,0.85);
+  border-bottom: 1px solid var(--border);
+}
+
+.dark-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* =============================================
+   BADGE
+   ============================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-display);
+}
+
+.badge-pending   { background: rgba(245,166,35,0.15);  color: #F5A623; border: 1px solid rgba(245,166,35,0.3); }
+.badge-confirmed { background: rgba(16,208,140,0.15);  color: #10D08C; border: 1px solid rgba(16,208,140,0.3); }
+.badge-cancelled { background: rgba(255,77,106,0.15);  color: #FF4D6A; border: 1px solid rgba(255,77,106,0.3); }
+.badge-completed { background: rgba(75,123,255,0.15);  color: #4B7BFF; border: 1px solid rgba(75,123,255,0.3); }
+
+/* =============================================
+   SECTION DIVIDER
+   ============================================= */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(43,94,232,0.12);
+  border: 1px solid rgba(43,94,232,0.3);
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* =============================================
+   GRID NOISE OVERLAY (subtle texture)
+   ============================================= */
+.noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
