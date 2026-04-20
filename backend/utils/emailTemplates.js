@@ -1,7 +1,7 @@
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 exports.welcomeEmail = (name) => ({
-  subject: 'Welcome to Xplosure! 🚀',
+  subject: "Welcome to Xplosure! 🚀",
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
       <div style="background: #2563eb; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -32,7 +32,7 @@ exports.welcomeEmail = (name) => ({
 });
 
 exports.resumeAnalyzedEmail = (name, analysis) => ({
-  subject: 'Your Resume Analysis is Ready! 📊',
+  subject: "Your Resume Analysis is Ready! 📊",
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
       <div style="background: #2563eb; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -43,9 +43,9 @@ exports.resumeAnalyzedEmail = (name, analysis) => ({
         <p>We've analyzed your resume. Here's a quick summary:</p>
         <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <!-- ✅ FIX: Safe access with fallback values -->
-          <p><strong>ATS Score:</strong> ${analysis?.atsScore ?? 'N/A'}%</p>
-          <p><strong>Top Matched Role:</strong> ${analysis?.matchedRoles?.[0]?.role ?? 'N/A'}</p>
-          <p><strong>Key Feedback:</strong> ${analysis?.feedback?.[0] ?? 'Check your dashboard for full details.'}</p>
+          <p><strong>ATS Score:</strong> ${analysis?.atsScore ?? "N/A"}%</p>
+          <p><strong>Top Matched Role:</strong> ${analysis?.matchedRoles?.[0]?.role ?? "N/A"}</p>
+          <p><strong>Key Feedback:</strong> ${analysis?.feedback?.[0] ?? "Check your dashboard for full details."}</p>
         </div>
         <div style="text-align: center; margin: 32px 0;">
           <a href="${CLIENT_URL}/dashboard"
@@ -61,7 +61,7 @@ exports.resumeAnalyzedEmail = (name, analysis) => ({
 });
 
 exports.sessionReminderEmail = (name, booking) => ({
-  subject: 'Reminder: Your Session is Tomorrow! ⏰',
+  subject: "Reminder: Your Session is Tomorrow! ⏰",
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
       <div style="background: #2563eb; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -71,9 +71,9 @@ exports.sessionReminderEmail = (name, booking) => ({
         <p>Hi <strong>${name}</strong>,</p>
         <p>This is a friendly reminder about your upcoming counseling session:</p>
         <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 20px; border-radius: 4px; margin: 20px 0;">
-          <p style="margin: 4px 0;"><strong>Service:</strong> ${booking?.service ?? 'N/A'}</p>
-          <p style="margin: 4px 0;"><strong>Date:</strong> ${booking?.date ? new Date(booking.date).toDateString() : 'N/A'}</p>
-          <p style="margin: 4px 0;"><strong>Time:</strong> ${booking?.time ?? 'N/A'}</p>
+          <p style="margin: 4px 0;"><strong>Service:</strong> ${booking?.service ?? "N/A"}</p>
+          <p style="margin: 4px 0;"><strong>Date:</strong> ${booking?.date ? new Date(booking.date).toDateString() : "N/A"}</p>
+          <p style="margin: 4px 0;"><strong>Time:</strong> ${booking?.time ?? "N/A"}</p>
         </div>
         <p>💡 Please be ready <strong>5 minutes before</strong> the scheduled time.</p>
         <div style="text-align: center; margin: 32px 0;">
@@ -90,7 +90,7 @@ exports.sessionReminderEmail = (name, booking) => ({
 });
 
 exports.sessionFollowUpEmail = (name, booking) => ({
-  subject: 'How was your session? We\'d love your feedback 💬',
+  subject: "How was your session? We'd love your feedback 💬",
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
       <div style="background: #2563eb; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -98,7 +98,7 @@ exports.sessionFollowUpEmail = (name, booking) => ({
       </div>
       <div style="padding: 32px; background: #ffffff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
         <p>Hi <strong>${name}</strong>,</p>
-        <p>We hope your <strong>${booking?.service ?? 'counseling'}</strong> session went well!</p>
+        <p>We hope your <strong>${booking?.service ?? "counseling"}</strong> session went well!</p>
         <p>Your feedback helps us improve our services for everyone. It only takes 1 minute!</p>
         <div style="text-align: center; margin: 32px 0;">
           <a href="${CLIENT_URL}/feedback"
@@ -115,7 +115,7 @@ exports.sessionFollowUpEmail = (name, booking) => ({
 
 // ✅ NEW: Password reset email
 exports.passwordResetEmail = (name, resetToken) => ({
-  subject: 'Reset Your Xplosure Password 🔐',
+  subject: "Reset Your Xplosure Password 🔐",
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
       <div style="background: #2563eb; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -138,6 +138,36 @@ exports.passwordResetEmail = (name, resetToken) => ({
           </p>
         </div>
         <p style="margin-top: 24px;">Best regards,<br><strong>Xplosure Team</strong></p>
+      </div>
+    </div>
+  `,
+});
+
+// ✅ NEW: Booking Confirmation Template
+exports.bookingConfirmationEmail = (name, booking) => ({
+  subject: "Booking Confirmed! 🎉",
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
+      <div style="background: #10D08C; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+        <h1 style="color: white; margin: 0;">Booking Received</h1>
+      </div>
+      <div style="padding: 32px; background: #ffffff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>We have successfully received your booking request for a counseling session.</p>
+        <div style="background: #f3f4f6; border-left: 4px solid #10D08C; padding: 20px; border-radius: 4px; margin: 20px 0;">
+          <p style="margin: 4px 0;"><strong>Service:</strong> ${booking.service}</p>
+          <p style="margin: 4px 0;"><strong>Date:</strong> ${new Date(booking.date).toDateString()}</p>
+          <p style="margin: 4px 0;"><strong>Time:</strong> ${booking.time}</p>
+        </div>
+        <p>Our team will review and confirm your session soon. You can check the status in your dashboard.</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${process.env.CLIENT_URL || "http://localhost:3000"}/dashboard"
+             style="display: inline-block; padding: 14px 28px; background: #2b5ee8; color: white;
+                    text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Go to Dashboard →
+          </a>
+        </div>
+        <p>Best regards,<br><strong>Xplosure Team</strong></p>
       </div>
     </div>
   `,

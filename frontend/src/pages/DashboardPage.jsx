@@ -722,7 +722,7 @@ const DashboardPage = () => {
                         }))
                       }
                       className="input-dark"
-                      style={{ appearance: "none" }}
+                      /* ✅ FIX: Removed inline appearance style, handling via CSS */
                     >
                       <option value="">Select a service…</option>
                       {SERVICES.map((s) => (

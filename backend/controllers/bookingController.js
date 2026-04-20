@@ -1,5 +1,7 @@
-const Booking = require('../models/Booking');
-const logger = require('../utils/logger');
+const Booking = require("../models/Booking");
+const User = require("../models/User");
+const emailService = require("../services/emailService");
+const logger = require("../utils/logger");
 
 // @desc    Create a new booking
 // @route   POST /api/bookings
@@ -13,13 +15,13 @@ exports.createBooking = async (req, res, next) => {
       user: req.user.id,
       date: new Date(date),
       time,
-      status: { $ne: 'Cancelled' },
+      status: { $ne: "Cancelled" },
     });
 
     if (existingBooking) {
       return res.status(409).json({
         success: false,
-        message: 'You already have a booking at this date and time',
+        message: "You already have a booking at this date and time",
       });
     }
 
@@ -29,12 +31,24 @@ exports.createBooking = async (req, res, next) => {
       date: new Date(date),
       time,
       notes,
-      status: 'Pending',
+      status: "Pending",
     });
 
     await booking.save();
-
-    logger.info(`New booking created by user ${req.user.id} for ${service} on ${date}`);
+    // ✅ FIX: Send instant booking confirmation email (non-blocking)
+    const user = await User.findById(req.user.id);
+    if (user) {
+      emailService
+        .sendBookingConfirmation(user, booking)
+        .catch((err) =>
+          logger.error(
+            `Booking email failed for ${user.email}: ${err.message}`,
+          ),
+        );
+    }
+    logger.info(
+      `New booking created by user ${req.user.id} for ${service} on ${date}`,
+    );
 
     res.status(201).json({ success: true, booking });
   } catch (err) {
@@ -42,7 +56,7 @@ exports.createBooking = async (req, res, next) => {
     if (err.code === 11000) {
       return res.status(409).json({
         success: false,
-        message: 'You already have a booking at this date and time',
+        message: "You already have a booking at this date and time",
       });
     }
     next(err);
@@ -76,14 +90,16 @@ exports.getBookingById = async (req, res, next) => {
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Booking not found" });
     }
 
     // Check if user owns this booking
     if (booking.user.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to access this booking',
+        message: "Not authorized to access this booking",
       });
     }
 
@@ -101,17 +117,23 @@ exports.cancelBooking = async (req, res, next) => {
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Booking not found" });
     }
 
     // Check ownership
     if (booking.user.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Not authorized' });
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
     }
 
     // Check if already cancelled
-    if (booking.status === 'Cancelled') {
-      return res.status(400).json({ success: false, message: 'Booking is already cancelled' });
+    if (booking.status === "Cancelled") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Booking is already cancelled" });
     }
 
     // ✅ FIX: Using Date object comparison (date is now a Date type)
@@ -120,10 +142,12 @@ exports.cancelBooking = async (req, res, next) => {
     today.setHours(0, 0, 0, 0);
 
     if (bookingDate < today) {
-      return res.status(400).json({ success: false, message: 'Cannot cancel past bookings' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Cannot cancel past bookings" });
     }
 
-    booking.status = 'Cancelled';
+    booking.status = "Cancelled";
     await booking.save();
 
     logger.info(`Booking ${booking._id} cancelled by user ${req.user.id}`);

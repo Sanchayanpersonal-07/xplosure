@@ -1,15 +1,15 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const logger = require('../utils/logger');
-const emailService = require('../services/emailService');
-require('dotenv').config();
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const logger = require("../utils/logger");
+const emailService = require("../services/emailService");
+require("dotenv").config();
 
 // Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ user: { id: userId } }, process.env.JWT_SECRET, {
-    expiresIn: '5h',
+const generateToken = (userId, role) => {
+  return jwt.sign({ user: { id: userId, role: role } }, process.env.JWT_SECRET, {
+    expiresIn: "5h",
   });
 };
 
@@ -25,7 +25,7 @@ exports.signup = async (req, res, next) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'User with this email already exists',
+        message: "User with this email already exists",
       });
     }
 
@@ -38,12 +38,14 @@ exports.signup = async (req, res, next) => {
     await user.save();
 
     // Send welcome email (non-blocking)
-    emailService.sendWelcomeEmail(user).catch((err) =>
-      logger.error(`Welcome email failed for ${user.email}: ${err.message}`)
-    );
+    emailService
+      .sendWelcomeEmail(user)
+      .catch((err) =>
+        logger.error(`Welcome email failed for ${user.email}: ${err.message}`),
+      );
 
     // Generate token
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, user.role);
 
     const userData = {
       id: user.id,
@@ -72,11 +74,11 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body;
 
     // Find user — password is select:false so we must explicitly select it
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: "Invalid email or password",
       });
     }
 
@@ -85,12 +87,12 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: "Invalid email or password",
       });
     }
 
     // Generate token
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, user.role);
 
     const userData = {
       id: user.id,
@@ -116,11 +118,11 @@ exports.login = async (req, res, next) => {
 // @access  Private
 exports.getUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -143,28 +145,35 @@ exports.forgotPassword = async (req, res, next) => {
     if (!user) {
       return res.json({
         success: true,
-        message: 'If this email exists, a reset link has been sent.',
+        message: "If this email exists, a reset link has been sent.",
       });
     }
 
     // Generate secure random token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
     user.passwordResetToken = hashedToken;
     user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
     // Send reset email (non-blocking)
-    emailService.sendPasswordResetEmail(user, resetToken).catch((err) =>
-      logger.error(`Password reset email failed for ${user.email}: ${err.message}`)
-    );
+    emailService
+      .sendPasswordResetEmail(user, resetToken)
+      .catch((err) =>
+        logger.error(
+          `Password reset email failed for ${user.email}: ${err.message}`,
+        ),
+      );
 
     logger.info(`Password reset requested for: ${user.email}`);
 
     res.json({
       success: true,
-      message: 'If this email exists, a reset link has been sent.',
+      message: "If this email exists, a reset link has been sent.",
     });
   } catch (err) {
     next(err);
@@ -179,17 +188,17 @@ exports.resetPassword = async (req, res, next) => {
     const { token, newPassword } = req.body;
 
     // Hash the token from URL to compare with stored hash
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() },
-    }).select('+password');
+    }).select("+password");
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired reset token',
+        message: "Invalid or expired reset token",
       });
     }
 
@@ -202,7 +211,22 @@ exports.resetPassword = async (req, res, next) => {
 
     logger.info(`Password reset successful for: ${user.email}`);
 
-    res.json({ success: true, message: 'Password reset successful. Please login.' });
+    res.json({
+      success: true,
+      message: "Password reset successful. Please login.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Logout user (clear token conceptually)
+// @route   POST /api/auth/logout
+// @access  Private
+exports.logout = async (req, res, next) => {
+  try {
+    logger.info(`User logged out: ID ${req.user.id}`);
+    res.json({ success: true, message: "Logged out successfully" });
   } catch (err) {
     next(err);
   }

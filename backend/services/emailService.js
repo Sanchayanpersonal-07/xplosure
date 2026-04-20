@@ -1,20 +1,20 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const {
   welcomeEmail,
   resumeAnalyzedEmail,
   sessionReminderEmail,
   sessionFollowUpEmail,
   passwordResetEmail,
-} = require('../utils/emailTemplates');
-const EmailLog = require('../models/EmailLog');
-const logger = require('../utils/logger');
+} = require("../utils/emailTemplates");
+const EmailLog = require("../models/EmailLog");
+const logger = require("../utils/logger");
 
 // Configure transporter
 let transporter = null;
 
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -22,14 +22,20 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   });
 
   transporter.verify((error) => {
-    if (error) logger.error('Email service error:', error);
-    else logger.info('Email service ready');
+    if (error) logger.error("Email service error:", error);
+    else logger.info("Email service ready");
   });
 } else {
-  logger.warn('Email credentials missing. Email features disabled.');
+  logger.warn("Email credentials missing. Email features disabled.");
 }
 
-const sendEmail = async (to, subject, html, userId = null, type = 'general') => {
+const sendEmail = async (
+  to,
+  subject,
+  html,
+  userId = null,
+  type = "general",
+) => {
   if (!transporter) {
     logger.info(`Email to ${to} skipped (no email credentials configured)`);
     return null;
@@ -48,7 +54,7 @@ const sendEmail = async (to, subject, html, userId = null, type = 'general') => 
       subject,
       type,
       userId,
-      status: 'sent',
+      status: "sent",
       messageId: info.messageId,
     });
 
@@ -61,7 +67,7 @@ const sendEmail = async (to, subject, html, userId = null, type = 'general') => 
       subject,
       type,
       userId,
-      status: 'failed',
+      status: "failed",
       error: error.message,
     });
     return null;
@@ -70,28 +76,38 @@ const sendEmail = async (to, subject, html, userId = null, type = 'general') => 
 
 exports.sendWelcomeEmail = async (user) => {
   const { subject, html } = welcomeEmail(user.name);
-  await sendEmail(user.email, subject, html, user._id, 'welcome');
+  await sendEmail(user.email, subject, html, user._id, "welcome");
 };
 
 exports.sendResumeAnalyzedEmail = async (user, analysis) => {
   const { subject, html } = resumeAnalyzedEmail(user.name, analysis);
-  await sendEmail(user.email, subject, html, user._id, 'resume_analyzed');
+  await sendEmail(user.email, subject, html, user._id, "resume_analyzed");
 };
 
 exports.sendSessionReminder = async (user, booking) => {
   const { subject, html } = sessionReminderEmail(user.name, booking);
-  await sendEmail(user.email, subject, html, user._id, 'session_reminder');
+  await sendEmail(user.email, subject, html, user._id, "session_reminder");
 };
 
 exports.sendSessionFollowUp = async (user, booking) => {
   const { subject, html } = sessionFollowUpEmail(user.name, booking);
-  await sendEmail(user.email, subject, html, user._id, 'session_followup');
+  await sendEmail(user.email, subject, html, user._id, "session_followup");
 };
 
 // ✅ NEW: Password reset email
 exports.sendPasswordResetEmail = async (user, resetToken) => {
   const { subject, html } = passwordResetEmail(user.name, resetToken);
-  await sendEmail(user.email, subject, html, user._id, 'password_reset');
+  await sendEmail(user.email, subject, html, user._id, "password_reset");
+};
+
+// ✅ NEW: Booking Confirmation email function add koro
+exports.sendBookingConfirmation = async (user, booking) => {
+  const { subject, html } =
+    require("../utils/emailTemplates").bookingConfirmationEmail(
+      user.name,
+      booking,
+    );
+  await sendEmail(user.email, subject, html, user._id, "general");
 };
 
 // ✅ FIX: Check if reminder already sent within last 20 hours to prevent duplicates
@@ -100,7 +116,7 @@ const hasReminderBeenSent = async (userId, type, hoursWindow = 20) => {
   const existing = await EmailLog.findOne({
     userId,
     type,
-    status: 'sent',
+    status: "sent",
     createdAt: { $gte: cutoff },
   });
   return !!existing;
@@ -108,7 +124,7 @@ const hasReminderBeenSent = async (userId, type, hoursWindow = 20) => {
 
 // Cron job — run every hour to check for reminders
 exports.checkAndSendReminders = async () => {
-  const Booking = require('../models/Booking');
+  const Booking = require("../models/Booking");
 
   // Session reminder — bookings confirmed for tomorrow
   const tomorrow = new Date();
@@ -119,14 +135,17 @@ exports.checkAndSendReminders = async () => {
 
   const upcomingBookings = await Booking.find({
     date: { $gte: tomorrow, $lte: tomorrowEnd },
-    status: 'Confirmed',
-  }).populate('user');
+    status: "Confirmed",
+  }).populate("user");
 
   for (const booking of upcomingBookings) {
     if (!booking.user) continue;
 
     // ✅ FIX: Skip if reminder already sent for this user in last 20 hours
-    const alreadySent = await hasReminderBeenSent(booking.user._id, 'session_reminder');
+    const alreadySent = await hasReminderBeenSent(
+      booking.user._id,
+      "session_reminder",
+    );
     if (!alreadySent) {
       await exports.sendSessionReminder(booking.user, booking);
     }
@@ -141,17 +160,22 @@ exports.checkAndSendReminders = async () => {
 
   const pastBookings = await Booking.find({
     date: { $gte: yesterday, $lte: yesterdayEnd },
-    status: 'Confirmed',
-  }).populate('user');
+    status: "Confirmed",
+  }).populate("user");
 
   for (const booking of pastBookings) {
     if (!booking.user) continue;
 
-    const alreadySent = await hasReminderBeenSent(booking.user._id, 'session_followup');
+    const alreadySent = await hasReminderBeenSent(
+      booking.user._id,
+      "session_followup",
+    );
     if (!alreadySent) {
       await exports.sendSessionFollowUp(booking.user, booking);
     }
   }
 
-  logger.info(`Reminder cron completed. Processed ${upcomingBookings.length} upcoming + ${pastBookings.length} past bookings.`);
+  logger.info(
+    `Reminder cron completed. Processed ${upcomingBookings.length} upcoming + ${pastBookings.length} past bookings.`,
+  );
 };

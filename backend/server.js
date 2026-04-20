@@ -106,6 +106,8 @@ const authLimiter = rateLimit({
 app.use("/api/", limiter);
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/signup", authLimiter);
+app.use("/api/auth/forgot-password", authLimiter);
+app.use("/api/auth/reset-password", authLimiter);
 
 // ✅ FIX: Serve uploaded resumes with auth check (not publicly accessible)
 app.get("/uploads/:filename", authMiddleware, (req, res) => {
@@ -150,6 +152,7 @@ app.use("/api/users", require("./routes/users"));
 app.use("/api/bookings", require("./routes/bookings"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/cover-letter", require("./routes/coverLetter"));
+app.use("/api/pricing", require("./routes/pricing"));
 
 // 404 handler
 app.use((req, res) => {

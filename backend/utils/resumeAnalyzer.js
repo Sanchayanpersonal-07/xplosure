@@ -329,6 +329,7 @@ const analyzeResumeText = (text) => {
     recommendations: [...new Set(recommendations)],
     feedback,
     matchedRoles: topRoles,
+    foundSkills: [...foundSkills],
     skillGap: {
       role: primaryRole,
       missingSkills,
@@ -340,7 +341,7 @@ const analyzeResumeText = (text) => {
 const parseResumePDF = async (filePath) => {
   // ✅ FIX: Path traversal check
   const resolvedPath = path.resolve(filePath);
-  const uploadsDir = path.resolve("./uploads");
+  const uploadsDir = path.resolve(__dirname, '../uploads');
   if (!resolvedPath.startsWith(uploadsDir)) {
     throw new Error("Invalid file path");
   }
@@ -348,7 +349,7 @@ const parseResumePDF = async (filePath) => {
   try {
     // ✅ FIX: Use async readFile instead of blocking readFileSync
     const dataBuffer = await fs.readFile(resolvedPath);
-    const options = { max: 3 };
+    const options = { max: 10 };
     const pdfData = await pdfParse(dataBuffer, options);
 
     if (!pdfData.text || pdfData.text.trim().length < 50) {

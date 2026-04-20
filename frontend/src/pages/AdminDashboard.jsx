@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-// ✅ FIX: Removed unused 'motion' import
+// eslint-disable-next-line no-unused-vars
+import { motion } from "framer-motion";
 import api from "../services/api";
 import {
   Users,
@@ -25,6 +26,9 @@ import {
 import toast from "react-hot-toast";
 import PageLoader from "../components/common/PageLoader";
 import { formatDate } from "../utils/validators";
+
+// ✅ NEW: Import PricingManagement Component
+import PricingManagement from "../components/admin/PricingManagement";
 
 // ✅ FIX: Defined STAT_CONFIG with named Icon references
 // instead of destructuring rename which ESLint flags as unused
@@ -175,7 +179,8 @@ const AdminDashboard = () => {
             border: "1px solid var(--border)",
           }}
         >
-          {["overview", "users", "bookings"].map((t) => (
+          {/* ✅ UPDATED: Added "pricing" to the tabs array */}
+          {["overview", "users", "bookings", "pricing"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -636,6 +641,10 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* ── PRICING ── */}
+        {/* ✅ NEW: Render PricingManagement when the pricing tab is active */}
+        {tab === "pricing" && <PricingManagement />}
       </div>
     </div>
   );

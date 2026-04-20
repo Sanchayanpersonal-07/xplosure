@@ -1,10 +1,10 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const { parseResumePDF } = require('../utils/resumeAnalyzer');
-const emailService = require('../services/emailService');
-const logger = require('../utils/logger');
-const fs = require('fs').promises;
-const path = require('path');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const { parseResumePDF } = require("../utils/resumeAnalyzer");
+const emailService = require("../services/emailService");
+const logger = require("../utils/logger");
+const fs = require("fs").promises;
+const path = require("path");
 
 // @desc    Upload and analyze resume
 // @route   POST /api/users/upload-resume
@@ -12,27 +12,30 @@ const path = require('path');
 exports.uploadResume = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
     }
 
     const user = await User.findById(req.user.id);
     if (!user) {
       await fs.unlink(req.file.path).catch(() => {});
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // Delete old resume if exists
     if (user.resumePath) {
-      const oldFilePath = path.join(__dirname, '..', user.resumePath);
+      const oldFilePath = path.join(__dirname, "..", user.resumePath);
       await fs.unlink(oldFilePath).catch(() => {});
     }
 
     user.resumePath = `uploads/${req.file.filename}`;
 
-    // ✅ FIX: Declare analysis outside try block so it's accessible after
     let analysis = null;
 
-    if (req.file.mimetype === 'application/pdf') {
+    if (req.file.mimetype === "application/pdf") {
       try {
         analysis = await parseResumePDF(req.file.path);
         user.atsScore = analysis.atsScore;
@@ -40,26 +43,34 @@ exports.uploadResume = async (req, res, next) => {
         user.resumeFeedback = analysis.feedback;
         user.matchedRoles = analysis.matchedRoles;
         user.skillGap = analysis.skillGap;
+        // ✅ NEW: Save actual found skills for use in cover letter generation
+        user.foundSkills = analysis.foundSkills || [];
       } catch (parseError) {
         logger.error(`PDF parsing error: ${parseError.message}`);
         user.atsScore = 0;
-        user.recommendedCounseling = ['Resume & Interview Prep'];
-        user.resumeFeedback = ['Could not extract text. Please upload a text-based PDF.'];
+        user.recommendedCounseling = ["Resume & Interview Prep"];
+        user.resumeFeedback = [
+          "Could not extract text. Please upload a text-based PDF.",
+        ];
         user.matchedRoles = [];
-        user.skillGap = { role: '', missingSkills: [], courses: [] };
+        user.foundSkills = [];
+        user.skillGap = { role: "", missingSkills: [], courses: [] };
       }
     }
 
     await user.save();
 
-    // ✅ FIX: Only send email if analysis was successful
     if (analysis) {
-      emailService.sendResumeAnalyzedEmail(user, analysis).catch((err) =>
-        logger.error(`Resume analyzed email failed for ${user.email}: ${err.message}`)
-      );
+      emailService
+        .sendResumeAnalyzedEmail(user, analysis)
+        .catch((err) =>
+          logger.error(
+            `Resume analyzed email failed for ${user.email}: ${err.message}`,
+          ),
+        );
     }
 
-    const updatedUser = await User.findById(req.user.id).select('-password');
+    const updatedUser = await User.findById(req.user.id).select("-password");
     logger.info(`Resume uploaded and analyzed for ${user.email}`);
 
     res.json({ success: true, user: updatedUser });
@@ -74,9 +85,11 @@ exports.uploadResume = async (req, res, next) => {
 // @access  Private
 exports.getProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     res.json({ success: true, user });
@@ -100,10 +113,12 @@ exports.updateProfile = async (req, res, next) => {
     const user = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
       runValidators: true,
-    }).select('-password');
+    }).select("-password");
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     logger.info(`User profile updated: ${user.email}`);
@@ -121,15 +136,19 @@ exports.changePassword = async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
 
     // Get user with password field
-    const user = await User.findById(req.user.id).select('+password');
+    const user = await User.findById(req.user.id).select("+password");
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Current password is incorrect" });
     }
 
     // Prevent reusing same password
@@ -137,7 +156,7 @@ exports.changePassword = async (req, res, next) => {
     if (isSame) {
       return res.status(400).json({
         success: false,
-        message: 'New password must be different from current password',
+        message: "New password must be different from current password",
       });
     }
 
@@ -147,7 +166,7 @@ exports.changePassword = async (req, res, next) => {
     await user.save();
 
     logger.info(`Password changed for: ${user.email}`);
-    res.json({ success: true, message: 'Password changed successfully' });
+    res.json({ success: true, message: "Password changed successfully" });
   } catch (err) {
     next(err);
   }

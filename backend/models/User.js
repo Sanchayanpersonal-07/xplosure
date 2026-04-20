@@ -1,31 +1,31 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Name is required'],
+      required: [true, "Name is required"],
       trim: true,
-      minlength: [2, 'Name must be at least 2 characters'],
-      maxlength: [50, 'Name cannot exceed 50 characters'],
+      minlength: [2, "Name must be at least 2 characters"],
+      maxlength: [50, "Name cannot exceed 50 characters"],
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address'],
+      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters'],
-      select: false, // ✅ Never returned by default — must use .select('+password')
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be at least 8 characters"],
+      select: false, // Never returned by default — must use .select('+password')
     },
     resumePath: {
       type: String,
-      default: '',
+      default: "",
     },
     atsScore: {
       type: Number,
@@ -48,6 +48,12 @@ const UserSchema = new mongoose.Schema(
         roadmap: [String],
       },
     ],
+    // ✅ NEW: Actual skills detected in resume (used by coverLetterGenerator)
+    // Populated by resumeAnalyzer.analyzeResumeText()
+    foundSkills: {
+      type: [String],
+      default: [],
+    },
     skillGap: {
       role: String,
       missingSkills: [String],
@@ -63,16 +69,12 @@ const UserSchema = new mongoose.Schema(
         },
       ],
     },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: ["user", "admin"],
+      default: "user",
     },
-    // ✅ NEW: Password reset fields
+    // Password reset fields
     passwordResetToken: {
       type: String,
       select: false,
@@ -82,9 +84,9 @@ const UserSchema = new mongoose.Schema(
       select: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 UserSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model("User", UserSchema);

@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   signup,
   login,
+  logout,
   getUser,
   forgotPassword,
   resetPassword,
@@ -22,6 +23,10 @@ router.post('/signup', signupValidation, signup);
 // @route   POST /api/auth/login
 // @access  Public
 router.post('/login', loginValidation, login);
+
+// @route   POST /api/auth/logout
+// @access  Private
+router.post('/logout', authMiddleware, logout);
 
 // @route   GET /api/auth/user
 // @access  Private
